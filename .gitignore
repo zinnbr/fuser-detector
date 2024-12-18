@@ -1,8 +1,0 @@
-# Ignore Visual Studio files
-.vs/
-
-# Ignore build outputs
-x64/
-
-# Ignore the large problematic file explicitly
-.v17/ipch/AutoPCH/
