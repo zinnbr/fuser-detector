@@ -1,7 +1,9 @@
 #define _WIN32_WINNT 0x0600
+
 #include <windows.h>
 #include <physicalmonitorenumerationapi.h>
 #include <lowlevelmonitorconfigurationapi.h>
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -9,7 +11,7 @@
 
 #pragma comment(lib, "Dxva2.lib")
 
-static const std::vector<std::wstring> KNOWN_SUSPICIOUS_VENDORS = {
+static const std::array<const std::wstring> KNOWN_SUSPICIOUS_VENDORS = {
     L"AOC2703",
     L"AOC3403",
     L"AUS2704",
@@ -20,14 +22,18 @@ static const std::vector<std::wstring> KNOWN_SUSPICIOUS_VENDORS = {
 
 void SetConsoleColor(WORD color) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
     SetConsoleTextAttribute(hConsole, color);
 }
 
 std::map<std::wstring, std::vector<BYTE>> EnumerateRegistryEDIDs() {
     std::map<std::wstring, std::vector<BYTE>> registryEDIDs;
+
     HKEY hKey;
+
     if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Enum\\DISPLAY", 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
         std::cerr << "Failed to open registry key.\n";
+
         return registryEDIDs;
     }
 
@@ -37,25 +43,23 @@ std::map<std::wstring, std::vector<BYTE>> EnumerateRegistryEDIDs() {
     while (true) {
         DWORD subKeyNameSize = (DWORD)(sizeof(subKeyName) / sizeof(subKeyName[0]));
         LONG ret = RegEnumKeyExW(hKey, index++, subKeyName, &subKeyNameSize, NULL, NULL, NULL, NULL);
-        if (ret == ERROR_NO_MORE_ITEMS) {
-            break;
-        }
-        else if (ret != ERROR_SUCCESS) {
+
+        if (ret == ERROR_NO_MORE_ITEMS || ret != ERROR_SUCCESS) {
             break;
         }
 
         HKEY hSubKey;
         std::wstring monitorKeyPath = std::wstring(L"SYSTEM\\CurrentControlSet\\Enum\\DISPLAY\\") + subKeyName;
+        
         if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, monitorKeyPath.c_str(), 0, KEY_READ, &hSubKey) == ERROR_SUCCESS) {
             DWORD index2 = 0;
-            WCHAR instanceName[256];
+            WCHAR instanceName[256]{L'\0'};
+
             while (true) {
                 DWORD instanceNameSize = (DWORD)(sizeof(instanceName) / sizeof(instanceName[0]));
                 LONG ret2 = RegEnumKeyExW(hSubKey, index2++, instanceName, &instanceNameSize, NULL, NULL, NULL, NULL);
-                if (ret2 == ERROR_NO_MORE_ITEMS) {
-                    break;
-                }
-                else if (ret2 != ERROR_SUCCESS) {
+
+                if (ret2 == ERROR_NO_MORE_ITEMS || ret2 != ERROR_SUCCESS) {
                     break;
                 }
 
@@ -82,6 +86,7 @@ std::map<std::wstring, std::vector<BYTE>> EnumerateRegistryEDIDs() {
 
 int main() {
     std::vector<HMONITOR> hMonitors;
+
     if (!EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMon, HDC, LPRECT, LPARAM pData) -> BOOL {
         auto monitors = reinterpret_cast<std::vector<HMONITOR>*>(pData);
         monitors->push_back(hMon);
@@ -193,6 +198,7 @@ int main() {
     else if (susLevel > 0) {
         SetConsoleColor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     }
+    
     std::wcout << susLevel << L"\n";
     std::wcout << L"Reason(s):\n";
     if (activeSuspicious) {

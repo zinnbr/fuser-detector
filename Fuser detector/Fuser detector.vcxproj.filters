@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Fuser detector.cpp">
+    <ClCompile Include="fuser_detector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
