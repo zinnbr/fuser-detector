@@ -1,3 +1,7 @@
+#ifndef _WIN32
+#error A compiler with WINAPI is required to compile.
+#endif 
+
 #define _WIN32_WINNT 0x0600
 
 #include <windows.h>
