@@ -8,6 +8,7 @@
 #include <physicalmonitorenumerationapi.h>
 #include <lowlevelmonitorconfigurationapi.h>
 
+#include <array>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -15,7 +16,7 @@
 
 #pragma comment(lib, "Dxva2.lib")
 
-static const std::array<const std::wstring> KNOWN_SUSPICIOUS_VENDORS = {
+static const std::array<const std::wstring, 6> KNOWN_SUSPICIOUS_VENDORS = {
     L"AOC2703",
     L"AOC3403",
     L"AUS2704",
